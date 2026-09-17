@@ -106,6 +106,7 @@ const getPasswordStrength = (pass) => {
 };
 
 export default function App() {
+  
   // Auth States
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('isAuth') === 'true');
   const [authMode, setAuthMode] = useState('login');
@@ -345,7 +346,6 @@ security_scan:
                 />
               </div>
 
-              {/* Password Strength Meter */}
               {authMode === 'signup' && passwordInput.length > 0 && (
                 <div className="mt-2 space-y-1.5">
                   <div className="flex gap-1 h-1.5">
@@ -458,428 +458,465 @@ security_scan:
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 overflow-y-auto bg-[#0b0f19] p-6 space-y-6">
+      <main className="flex-1 overflow-y-auto bg-[#0b0f19] p-6 space-y-6 flex flex-col justify-between">
         
-        {/* OVERVIEW DASHBOARD */}
-        {activeTab === 'dashboard' && (
-          <div className="space-y-6 max-w-6xl mx-auto">
-            
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-white">Security Posture Overview</h2>
-                <p className="text-xs text-slate-400">Real-time status of monitored web applications and APIs</p>
-              </div>
-              <button 
-                onClick={() => setIsAddSiteOpen(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-blue-600/20 transition"
-              >
-                <Plus className="w-4 h-4" /> Add Target Site
-              </button>
-            </div>
-
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
-                <span className="text-[11px] font-semibold text-slate-400">Total Monitored Targets</span>
-                <p className="text-2xl font-bold text-white">{sites.length}</p>
-              </div>
-              <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
-                <span className="text-[11px] font-semibold text-slate-400">Active Vulnerabilities</span>
-                <p className="text-2xl font-bold text-red-400">2 Critical / High</p>
-              </div>
-              <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
-                <span className="text-[11px] font-semibold text-slate-400">Avg. Security Score</span>
-                <p className="text-2xl font-bold text-emerald-400">71 / 100</p>
-              </div>
-              <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
-                <span className="text-[11px] font-semibold text-slate-400">CI/CD Webhooks</span>
-                <p className="text-2xl font-bold text-blue-400">Active</p>
-              </div>
-            </div>
-
-            {/* Client Sites Cards */}
-            <div className="space-y-3">
-              <h3 className="text-base font-bold text-white">Monitored Web Applications</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {sites.map(site => (
-                  <div key={site.id} className="bg-[#111827] border border-slate-800 p-5 rounded-xl space-y-4 hover:border-slate-700 transition">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-base text-white">{site.name}</h4>
-                        <a href={site.url} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline font-mono flex items-center gap-1 mt-0.5">
-                          {site.url} <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                      <span className={`px-2.5 py-1 rounded text-xs font-bold ${site.status === 'Safe' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                        {site.securityScore}% Score
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs bg-[#1e293b]/40 p-3 rounded-lg border border-slate-800">
-                      <div>
-                        <span className="text-slate-400 block text-[10px]">Detected CMS:</span>
-                        <span className="font-semibold text-slate-200">{site.cms}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 block text-[10px]">Outdated Components:</span>
-                        <span className="font-semibold text-amber-400">{site.pluginsOutdated} Plugins</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2">
-                      <button 
-                        onClick={() => { setSelectedSite(site); setActiveTab('scanner'); }} 
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-semibold flex items-center gap-1.5 transition"
-                      >
-                        <Play className="w-3.5 h-3.5" /> Launch Audit Scan
-                      </button>
-                      
-                      <button 
-                        onClick={() => handleDeleteSite(site.id)}
-                        className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        )}
-
-        {/* SCANNER & POC ENGINE TAB */}
-        {activeTab === 'scanner' && (
-          <div className="space-y-6 max-w-5xl mx-auto">
-            
-            {/* Target Selector & Scanner Action Bar */}
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div className="space-y-6">
+          {/* OVERVIEW DASHBOARD */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              
+              <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Automated Pentest & PoC Engine</h2>
-                  <p className="text-xs text-slate-400">Targeting: <span className="text-blue-400 font-mono font-semibold">{selectedSite.url}</span> ({selectedSite.name})</p>
+                  <h2 className="text-2xl font-bold text-white">Security Posture Overview</h2>
+                  <p className="text-xs text-slate-400">Real-time status of monitored web applications and APIs</p>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <select 
-                    value={selectedSite.id} 
-                    onChange={(e) => setSelectedSite(sites.find(s => s.id === Number(e.target.value)))}
-                    className="bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white px-3 py-2 rounded-lg"
-                  >
-                    {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-
-                  <button 
-                    onClick={handleRunScan} 
-                    disabled={isScanning}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition disabled:opacity-50"
-                  >
-                    <RotateCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} /> 
-                    {isScanning ? 'Scanning Target...' : 'Re-Run Scan'}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Findings & PoC Exploit Box */}
-            <div className="space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-red-400" /> Discovered Vulnerabilities & PoC Exploits
-              </h3>
-
-              {VULNERABILITIES.map((vuln) => {
-                const isExpanded = expandedPoc === vuln.id;
-                return (
-                  <div key={vuln.id} className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
-                    
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded border uppercase ${vuln.severity === 'Critical' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
-                            CVSS {vuln.cvssScore} • {vuln.severity}
-                          </span>
-                          <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{vuln.cve}</span>
-                        </div>
-                        <h4 className="text-base font-bold text-white">{vuln.title}</h4>
-                      </div>
-                      
-                      <button 
-                        onClick={() => setExpandedPoc(isExpanded ? null : vuln.id)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-                      >
-                        <Code2 className="w-4 h-4 text-blue-400" />
-                        <span>{isExpanded ? 'Hide PoC Exploit' : 'Show PoC Payload'}</span>
-                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-
-                    <p className="text-xs text-slate-300 leading-relaxed">{vuln.description}</p>
-
-                    <div className="p-3 bg-[#1e293b]/40 border border-slate-800/80 rounded-lg text-xs text-slate-200">
-                      <strong className="text-emerald-400 block mb-1">Recommended Patch / Remediation:</strong>
-                      {vuln.remediation}
-                    </div>
-
-                    {/* EXPANDABLE POC EXPLOIT GENERATOR */}
-                    {isExpanded && (
-                      <div className="pt-4 border-t border-slate-800 space-y-4">
-                        <div className="space-y-1.5">
-                          <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                            <Terminal className="w-3.5 h-3.5 text-blue-400" /> Reproduction Guide:
-                          </h5>
-                          <ul className="space-y-1 text-xs text-slate-400 font-mono bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                            {vuln.reproSteps.map((step, idx) => (
-                              <li key={idx}>{step}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-xs text-slate-400">
-                            <span className="font-semibold text-white">cURL Exploit Request Payload:</span>
-                            <button 
-                              onClick={() => copyPocPayload(vuln.id, vuln.pocPayload)}
-                              className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-[11px] font-semibold"
-                            >
-                              {copiedPocId === vuln.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                              {copiedPocId === vuln.id ? 'Copied Payload!' : 'Copy cURL Command'}
-                            </button>
-                          </div>
-                          
-                          <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
-                            {vuln.pocPayload}
-                          </pre>
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })}
-            </div>
-
-          </div>
-        )}
-
-        {/* CI/CD PIPELINE GENERATOR TAB */}
-        {activeTab === 'cicd' && (
-          <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-white">DevSecOps CI/CD Pipeline Generator</h2>
-                <p className="text-xs text-slate-400">Automate security audits directly within your GitHub or GitLab deployment workflows</p>
+                <button 
+                  onClick={() => setIsAddSiteOpen(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-blue-600/20 transition"
+                >
+                  <Plus className="w-4 h-4" /> Add Target Site
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">CI/CD Platform</label>
-                  <select 
-                    value={cicdPlatform} 
-                    onChange={(e) => setCicdPlatform(e.target.value)}
-                    className="w-full bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white p-2.5 rounded-lg"
-                  >
-                    <option value="github">GitHub Actions (.github/workflows)</option>
-                    <option value="gitlab">GitLab CI (.gitlab-ci.yml)</option>
-                  </select>
+              {/* Quick Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-400">Total Monitored Targets</span>
+                  <p className="text-2xl font-bold text-white">{sites.length}</p>
                 </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Security Audit Tool</label>
-                  <select 
-                    value={cicdTool} 
-                    onChange={(e) => setCicdTool(e.target.value)}
-                    className="w-full bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white p-2.5 rounded-lg"
-                  >
-                    <option value="wpscan">WPScan Vulnerability Scanner</option>
-                    <option value="owasp">OWASP ZAP Dynamic Audit</option>
-                  </select>
+                <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-400">Active Vulnerabilities</span>
+                  <p className="text-2xl font-bold text-red-400">2 Critical / High</p>
+                </div>
+                <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-400">Avg. Security Score</span>
+                  <p className="text-2xl font-bold text-emerald-400">71 / 100</p>
+                </div>
+                <div className="bg-[#111827] border border-slate-800 p-4 rounded-xl space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-400">CI/CD Webhooks</span>
+                  <p className="text-2xl font-bold text-blue-400">Active</p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-300">Generated Pipeline YAML Config:</span>
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(generateCicdYaml());
-                      setCopiedCicd(true);
-                      showToast('CI/CD YAML copied!');
-                      setTimeout(() => setCopiedCicd(false), 2000);
-                    }}
-                    className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
-                  >
-                    {copiedCicd ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedCicd ? 'Copied YAML' : 'Copy Configuration'}
-                  </button>
-                </div>
-
-                <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-blue-300 overflow-x-auto leading-relaxed">
-                  {generateCicdYaml()}
-                </pre>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* WEBHOOKS & API SETTINGS TAB */}
-        {activeTab === 'settings' && (
-          <div className="space-y-6 max-w-4xl mx-auto">
-            <form onSubmit={handleSaveSettings} className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-white">API Keys & Webhook Integrations</h2>
-                <p className="text-xs text-slate-400">Connect automated scanner engines and Slack/Telegram alert systems</p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Scanner API Keys</h3>
+              {/* Client Sites Cards */}
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-white">Monitored Web Applications</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {sites.map(site => (
+                    <div key={site.id} className="bg-[#111827] border border-slate-800 p-5 rounded-xl space-y-4 hover:border-slate-700 transition">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-base text-white">{site.name}</h4>
+                          <a href={site.url} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline font-mono flex items-center gap-1 mt-0.5">
+                            {site.url} <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded text-xs font-bold ${site.status === 'Safe' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                          {site.securityScore}% Score
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs bg-[#1e293b]/40 p-3 rounded-lg border border-slate-800">
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Detected CMS:</span>
+                          <span className="font-semibold text-slate-200">{site.cms}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Outdated Components:</span>
+                          <span className="font-semibold text-amber-400">{site.pluginsOutdated} Plugins</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <button 
+                          onClick={() => { setSelectedSite(site); setActiveTab('scanner'); }} 
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-semibold flex items-center gap-1.5 transition"
+                        >
+                          <Play className="w-3.5 h-3.5" /> Launch Audit Scan
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleDeleteSite(site.id)}
+                          className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* SCANNER & POC ENGINE TAB */}
+          {activeTab === 'scanner' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              
+              {/* Target Selector & Scanner Action Bar */}
+              <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">WPScan API Token</label>
-                    <input 
-                      type="password" 
-                      placeholder="wpscan_live_api_key_..." 
-                      value={apiKeys.wpscan}
-                      onChange={(e) => setApiKeys({ ...apiKeys, wpscan: e.target.value })}
-                      className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
-                    />
+                    <h2 className="text-xl font-bold text-white">Automated Pentest & PoC Engine</h2>
+                    <p className="text-xs text-slate-400">Targeting: <span className="text-blue-400 font-mono font-semibold">{selectedSite.url}</span> ({selectedSite.name})</p>
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">OWASP ZAP Key</label>
-                    <input 
-                      type="password" 
-                      placeholder="zap_api_key_..." 
-                      value={apiKeys.owaspZap}
-                      onChange={(e) => setApiKeys({ ...apiKeys, owaspZap: e.target.value })}
-                      className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
-                    />
+
+                  <div className="flex items-center gap-2">
+                    <select 
+                      value={selectedSite.id} 
+                      onChange={(e) => setSelectedSite(sites.find(s => s.id === Number(e.target.value)))}
+                      className="bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white px-3 py-2 rounded-lg"
+                    >
+                      {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+
+                    <button 
+                      onClick={handleRunScan} 
+                      disabled={isScanning}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition disabled:opacity-50"
+                    >
+                      <RotateCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} /> 
+                      {isScanning ? 'Scanning Target...' : 'Re-Run Scan'}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-slate-800">
-                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Alert Webhooks</h3>
-                <div className="space-y-4">
+              {/* Findings & PoC Exploit Box */}
+              <div className="space-y-4">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-red-400" /> Discovered Vulnerabilities & PoC Exploits
+                </h3>
+
+                {VULNERABILITIES.map((vuln) => {
+                  const isExpanded = expandedPoc === vuln.id;
+                  return (
+                    <div key={vuln.id} className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
+                      
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded border uppercase ${vuln.severity === 'Critical' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                              CVSS {vuln.cvssScore} • {vuln.severity}
+                            </span>
+                            <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{vuln.cve}</span>
+                          </div>
+                          <h4 className="text-base font-bold text-white">{vuln.title}</h4>
+                        </div>
+                        
+                        <button 
+                          onClick={() => setExpandedPoc(isExpanded ? null : vuln.id)}
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                        >
+                          <Code2 className="w-4 h-4 text-blue-400" />
+                          <span>{isExpanded ? 'Hide PoC Exploit' : 'Show PoC Payload'}</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-300 leading-relaxed">{vuln.description}</p>
+
+                      <div className="p-3 bg-[#1e293b]/40 border border-slate-800/80 rounded-lg text-xs text-slate-200">
+                        <strong className="text-emerald-400 block mb-1">Recommended Patch / Remediation:</strong>
+                        {vuln.remediation}
+                      </div>
+
+                      {/* EXPANDABLE POC EXPLOIT GENERATOR */}
+                      {isExpanded && (
+                        <div className="pt-4 border-t border-slate-800 space-y-4">
+                          <div className="space-y-1.5">
+                            <h5 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                              <Terminal className="w-3.5 h-3.5 text-blue-400" /> Reproduction Guide:
+                            </h5>
+                            <ul className="space-y-1 text-xs text-slate-400 font-mono bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                              {vuln.reproSteps.map((step, idx) => (
+                                <li key={idx}>{step}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-xs text-slate-400">
+                              <span className="font-semibold text-white">cURL Exploit Request Payload:</span>
+                              <button 
+                                onClick={() => copyPocPayload(vuln.id, vuln.pocPayload)}
+                                className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-[11px] font-semibold"
+                              >
+                                {copiedPocId === vuln.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedPocId === vuln.id ? 'Copied Payload!' : 'Copy cURL Command'}
+                              </button>
+                            </div>
+                            
+                            <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
+                              {vuln.pocPayload}
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          )}
+
+          {/* CI/CD PIPELINE GENERATOR TAB */}
+          {activeTab === 'cicd' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">DevSecOps CI/CD Pipeline Generator</h2>
+                  <p className="text-xs text-slate-400">Automate security audits directly within your GitHub or GitLab deployment workflows</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Slack Webhook URL</label>
-                    <input 
-                      type="url" 
-                      placeholder="https://hooks.slack.com/services/T00/B00/X00" 
-                      value={webhooks.slackUrl}
-                      onChange={(e) => setWebhooks({ ...webhooks, slackUrl: e.target.value })}
-                      className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
-                    />
+                    <label className="text-xs font-semibold text-slate-400 block mb-1">CI/CD Platform</label>
+                    <select 
+                      value={cicdPlatform} 
+                      onChange={(e) => setCicdPlatform(e.target.value)}
+                      className="w-full bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white p-2.5 rounded-lg"
+                    >
+                      <option value="github">GitHub Actions (.github/workflows)</option>
+                      <option value="gitlab">GitLab CI (.gitlab-ci.yml)</option>
+                    </select>
                   </div>
 
-                  <div className="flex items-center gap-3 pt-2">
-                    <input 
-                      type="checkbox" 
-                      id="notifyCrit"
-                      checked={webhooks.notifyOnCritical}
-                      onChange={(e) => setWebhooks({ ...webhooks, notifyOnCritical: e.target.checked })}
-                      className="rounded bg-[#1e293b] border-slate-700 text-blue-600 focus:ring-0"
-                    />
-                    <label htmlFor="notifyCrit" className="text-xs text-slate-300 font-medium">Instantly send webhook alerts when Critical/High CVEs are detected</label>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 block mb-1">Security Audit Tool</label>
+                    <select 
+                      value={cicdTool} 
+                      onChange={(e) => setCicdTool(e.target.value)}
+                      className="w-full bg-[#1e293b] border border-slate-700 text-xs font-semibold text-white p-2.5 rounded-lg"
+                    >
+                      <option value="wpscan">WPScan Vulnerability Scanner</option>
+                      <option value="owasp">OWASP ZAP Dynamic Audit</option>
+                    </select>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-slate-300">Generated Pipeline YAML Config:</span>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(generateCicdYaml());
+                        setCopiedCicd(true);
+                        showToast('CI/CD YAML copied!');
+                        setTimeout(() => setCopiedCicd(false), 2000);
+                      }}
+                      className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
+                    >
+                      {copiedCicd ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedCicd ? 'Copied YAML!' : 'Copy Workflow'}
+                    </button>
+                  </div>
+
+                  <pre className="bg-[#080c14] p-4 rounded-lg border border-slate-800 text-[11px] font-mono text-blue-300 overflow-x-auto leading-relaxed">
+                    {generateCicdYaml()}
+                  </pre>
+                </div>
               </div>
+            </div>
+          )}
 
-              <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 font-semibold text-xs rounded-lg text-white transition">
-                Save Configurations
-              </button>
-            </form>
-          </div>
-        )}
+          {/* WEBHOOKS & API KEYS SETTINGS TAB */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <form onSubmit={handleSaveSettings} className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Integrations & Webhook Configurations</h2>
+                  <p className="text-xs text-slate-400">Set up API keys and automated breach notification alerts</p>
+                </div>
 
-        {/* REPORTS & EXPORT TAB */}
-        {activeTab === 'reports' && (
-          <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-white">Audit Reports & Compliance Export</h2>
-                <p className="text-xs text-slate-400">Generate executive vulnerability summaries for client presentation</p>
-              </div>
+                <div className="space-y-4 border-t border-slate-800 pt-4">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Key className="w-4 h-4 text-blue-400" /> Security Scanner API Keys
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">WPScan API Key</label>
+                      <input 
+                        type="password" 
+                        placeholder="••••••••••••••••"
+                        value={apiKeys.wpscan}
+                        onChange={(e) => setApiKeys({...apiKeys, wpscan: e.target.value})}
+                        className="w-full bg-[#1e293b]/60 border border-slate-700 text-xs text-white p-2.5 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">OWASP ZAP Token</label>
+                      <input 
+                        type="password" 
+                        placeholder="••••••••••••••••"
+                        value={apiKeys.owaspZap}
+                        onChange={(e) => setApiKeys({...apiKeys, owaspZap: e.target.value})}
+                        className="w-full bg-[#1e293b]/60 border border-slate-700 text-xs text-white p-2.5 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-              <div className="p-4 bg-[#1e293b]/40 border border-slate-800 rounded-xl space-y-4">
+                <div className="space-y-4 border-t border-slate-800 pt-4">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-blue-400" /> Automated Webhook Alerts
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Slack Incoming Webhook URL</label>
+                      <input 
+                        type="text" 
+                        placeholder="https://hooks.slack.com/services/..."
+                        value={webhooks.slackUrl}
+                        onChange={(e) => setWebhooks({...webhooks, slackUrl: e.target.value})}
+                        className="w-full bg-[#1e293b]/60 border border-slate-700 text-xs text-white p-2.5 rounded-lg"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">Telegram Bot Token</label>
+                        <input 
+                          type="text" 
+                          placeholder="123456789:ABCdef..."
+                          value={webhooks.telegramToken}
+                          onChange={(e) => setWebhooks({...webhooks, telegramToken: e.target.value})}
+                          className="w-full bg-[#1e293b]/60 border border-slate-700 text-xs text-white p-2.5 rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">Telegram Chat ID</label>
+                        <input 
+                          type="text" 
+                          placeholder="-100123456789"
+                          value={webhooks.telegramChatId}
+                          onChange={(e) => setWebhooks({...webhooks, telegramChatId: e.target.value})}
+                          className="w-full bg-[#1e293b]/60 border border-slate-700 text-xs text-white p-2.5 rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-blue-600/20 transition">
+                  Save Integrations
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* REPORTS & AUDIT LOGS TAB */}
+          {activeTab === 'reports' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-bold text-sm text-white">{selectedSite.name} Executive Audit Report</h4>
-                    <p className="text-xs text-slate-400">Includes 2 CVE findings, CVSS scores, remediation steps, and cURL PoC payloads.</p>
+                    <h2 className="text-xl font-bold text-white">Security Reports & Compliance Audit Logs</h2>
+                    <p className="text-xs text-slate-400">Download executive pentest reports and automated vulnerability logs</p>
                   </div>
                   <button 
-                    onClick={() => showToast('Generating Executive Audit Report (PDF)...')}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2"
+                    onClick={() => showToast('Downloading Pentest Audit Report PDF...')}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition"
                   >
-                    <Download className="w-3.5 h-3.5" /> Download PDF Report
+                    <Download className="w-4 h-4" /> Export Executive PDF
                   </button>
+                </div>
+
+                <div className="space-y-2 border-t border-slate-800 pt-4">
+                  {[
+                    { date: 'Today, 10:14 AM', target: 'Fashion Hub BD', type: 'WooCommerce Core RCE Detected', status: 'Critical' },
+                    { date: 'Yesterday, 04:30 PM', target: 'TechCorp E-Commerce', type: 'Header Security Check Passed', status: 'Safe' },
+                    { date: '3 days ago', target: 'Fashion Hub BD', type: 'Automated CI/CD Scan Triggered', status: 'Notice' }
+                  ].map((log, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3 bg-[#1e293b]/40 rounded-lg border border-slate-800 text-xs">
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-white block">{log.target} — {log.type}</span>
+                        <span className="text-[10px] text-slate-400">{log.date}</span>
+                      </div>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${log.status === 'Critical' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                        {log.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* SITE FOOTER */}
+        <footer className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2 mt-auto">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-blue-500" />
+            <span className="font-semibold text-slate-400">SecurOps Hub</span>
+            <span>— Automated Web Vulnerability & Pentest QA Suite By Wasiur Rahman</span>
           </div>
-        )}
+          <p>© {new Date().getFullYear()} SecurOps Security. All rights reserved.</p>
+        </footer>
 
       </main>
 
       {/* ADD TARGET SITE MODAL */}
       {isAddSiteOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#111827] border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-5 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#111827] border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white text-base">Add New Target Site</h3>
+              <h3 className="font-bold text-base text-white">Add New Target Site</h3>
               <button onClick={() => setIsAddSiteOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddSite} className="space-y-4">
+            <form onSubmit={handleAddSite} className="space-y-4 text-xs">
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Site Name</label>
+                <label className="font-semibold text-slate-400 block mb-1">Application / Client Name</label>
                 <input 
                   type="text" 
                   required
-                  placeholder="My Client Store" 
+                  placeholder="e.g. My Online Store" 
                   value={newSiteName}
                   onChange={(e) => setNewSiteName(e.target.value)}
-                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
+                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Target URL</label>
+                <label className="font-semibold text-slate-400 block mb-1">Target Domain / URL</label>
                 <input 
                   type="text" 
                   required
                   placeholder="https://example.com" 
                   value={newSiteUrl}
                   onChange={(e) => setNewSiteUrl(e.target.value)}
-                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white font-mono"
+                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Detected CMS / Stack</label>
+                <label className="font-semibold text-slate-400 block mb-1">CMS / Technology</label>
                 <input 
                   type="text" 
-                  placeholder="WordPress 6.4.2" 
                   value={newSiteCms}
                   onChange={(e) => setNewSiteCms(e.target.value)}
-                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
+                  className="w-full bg-[#1e293b]/60 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex gap-2 pt-2">
                 <button 
                   type="button" 
                   onClick={() => setIsAddSiteOpen(false)} 
-                  className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-700"
+                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 font-semibold rounded-lg text-slate-300"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-500"
+                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg text-white shadow-lg shadow-blue-600/20"
                 >
-                  Add Target Site
+                  Add Target
                 </button>
               </div>
             </form>
